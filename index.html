@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>石板配置シミュレーター | Sephiria</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <h1>🗿 セフィリア 石板配置シミュレーター</h1>
+  <p>バッグに石板を配置して効果を確認 &amp; 配置戦略プランを自動提案します。データ出典: Sephiria攻略Wiki「石板」ページ。</p>
+</header>
+
+<div class="layout">
+
+  <!-- 左: 石板パレット -->
+  <div class="panel">
+    <h2>石板一覧</h2>
+    <input id="searchInput" type="text" placeholder="名前で検索…">
+    <div class="palette-controls">
+      <button class="rarity-filter active" data-rarity="all">すべて</button>
+      <button class="rarity-filter" data-rarity="common">一般</button>
+      <button class="rarity-filter" data-rarity="uncommon">高級</button>
+      <button class="rarity-filter" data-rarity="rare">希少</button>
+      <button class="rarity-filter" data-rarity="legend">伝説</button>
+    </div>
+    <div class="filter-row">
+      <label><input type="checkbox" id="ownedFilter"> 所持数&gt;0のみ表示</label>
+      <span style="margin-left:auto"></span>
+      <button class="icon-btn" id="selectAllBtn">全所持</button>
+      <button class="icon-btn" id="selectNoneBtn">全解除</button>
+    </div>
+    <div id="palette"></div>
+  </div>
+
+  <!-- 中央: 盤面 -->
+  <div class="panel">
+    <h2>バッグ (配置シミュレーション)</h2>
+    <div class="bag-controls">
+      行 <input id="rowsInput" type="number" value="5" min="1" max="10">
+      × 列 <input id="colsInput" type="number" value="6" min="1" max="10">
+      <button id="resetBtn">全消去</button>
+      <button id="markReserveBtn" title="他のアイテムが既に置かれているマスを占有済みにする">占有マス指定</button>
+      <button id="clearReservedBtn">占有解除(全)</button>
+    </div>
+    <div id="selectedBanner"></div>
+    <div id="warning"></div>
+    <div id="bag"></div>
+    <h2>集計</h2>
+    <div id="stats"></div>
+  </div>
+
+  <!-- 右: 戦略提案 -->
+  <div class="panel">
+    <h2>配置戦略プランを提案</h2>
+    <div class="suggest-controls">
+      <div class="row">
+        <button id="pickTargetBtn">① 対象マス指定</button>
+        <button id="clearTargetBtn">解除</button>
+      </div>
+      <div id="targetLabel"></div>
+      <div class="row">
+        使用石板の上限枚数
+        <input id="maxTabletsInput" type="number" value="6" min="1" max="20">
+        <span style="color:var(--text-dim); font-size:11px;">(左パレットの所持数の範囲内で検索)</span>
+      </div>
+      <button id="generateBtn">② 4種類のプランを生成</button>
+    </div>
+    <div id="suggestions"></div>
+  </div>
+
+</div>
+
+<footer>
+  盤面サイズは実際のバッグ仕様が不明な場合に備え可変にしています(既定値5行×6列はWikiの効果範囲表と同じサイズ)。<br>
+  提案プランはランダム局所探索(焼きなまし法)による近似解であり、理論上の最適解を保証するものではありません。「④ プランを生成」を再度押すと別解が出ることがあります。
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
