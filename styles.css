@@ -100,7 +100,7 @@ header p { margin: 0; color: var(--text-dim); font-size: 13px; }
 
 .tablet-row {
   display: grid;
-  grid-template-columns: 46px 1fr 44px;
+  grid-template-columns: 20px 46px 1fr 44px;
   gap: 8px;
   align-items: center;
   padding: 6px;
@@ -111,6 +111,20 @@ header p { margin: 0; color: var(--text-dim); font-size: 13px; }
 }
 .tablet-row:hover { border-color: var(--accent); }
 .tablet-row.selected { border-color: var(--accent); background: rgba(91,140,255,0.12); }
+.tablet-row:has(.owned-check input:checked) { background: rgba(62,207,106,0.08); }
+
+.owned-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.owned-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--pos);
+  cursor: pointer;
+}
 
 .tablet-mini { width: 46px; height: 38px; }
 .mini-grid { display: grid; gap: 1px; width: 46px; height: 38px; }
@@ -134,6 +148,7 @@ header p { margin: 0; color: var(--text-dim); font-size: 13px; }
   font-size: 12px;
   text-align: center;
 }
+.qty-input:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* --- 盤面 --- */
 .bag-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; font-size: 13px; }

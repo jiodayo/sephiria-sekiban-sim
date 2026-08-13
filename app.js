@@ -16,7 +16,9 @@ const state = {
   targetCell: null, // {r,c} 集中プランの対象
 };
 
-TABLETS.forEach(t => state.pool.set(t.id, 1));
+// 既定では「未所持」からスタートし、持っている石板だけチェックしていく運用を想定
+TABLETS.forEach(t => state.pool.set(t.id, 0));
+const lastQty = new Map(); // 所持チェックを外した際に数量を覚えておく(再チェック時に復元)
 
 /* ============================================================
  * 幾何ユーティリティ
@@ -297,20 +299,52 @@ function renderPalette() {
     info.appendChild(nameEl);
     info.appendChild(metaEl);
 
+    const ownedWrap = document.createElement('label');
+    ownedWrap.className = 'owned-check';
+    ownedWrap.title = '所持している(戦略提案の候補にする)';
+    const owned = document.createElement('input');
+    owned.type = 'checkbox';
+    const curQty = state.pool.get(t.id) ?? 0;
+    owned.checked = curQty > 0;
+    owned.addEventListener('click', e => e.stopPropagation());
+    ownedWrap.appendChild(owned);
+
     const qty = document.createElement('input');
     qty.type = 'number';
     qty.className = 'qty-input';
     qty.min = 0; qty.max = 9;
-    qty.value = state.pool.get(t.id) ?? 1;
-    qty.title = '所持数(戦略提案で使用する上限)';
+    qty.value = curQty;
+    qty.title = '所持数(2枚以上持っている場合はここを増やす)';
+    qty.disabled = curQty <= 0;
     qty.addEventListener('click', e => e.stopPropagation());
     qty.addEventListener('change', () => {
-      state.pool.set(t.id, Math.max(0, parseInt(qty.value || '0', 10)));
+      const v = Math.max(0, parseInt(qty.value || '0', 10));
+      state.pool.set(t.id, v);
+      owned.checked = v > 0;
+      qty.disabled = v <= 0;
+      if (v > 0) lastQty.set(t.id, v);
+    });
+
+    owned.addEventListener('change', () => {
+      if (owned.checked) {
+        const restore = lastQty.get(t.id) || 1;
+        state.pool.set(t.id, restore);
+        qty.value = restore;
+        qty.disabled = false;
+      } else {
+        const cur = state.pool.get(t.id) || 0;
+        if (cur > 0) lastQty.set(t.id, cur);
+        state.pool.set(t.id, 0);
+        qty.value = 0;
+        qty.disabled = true;
+      }
+      if (paletteFilter.owned) renderPalette();
     });
 
     const mini = buildMiniGrid(t, state.selectedTabletId === t.id ? state.selectedRot : 0);
     mini.classList.add('tablet-mini');
 
+    row.appendChild(ownedWrap);
     row.appendChild(mini);
     row.appendChild(info);
     row.appendChild(qty);
@@ -507,6 +541,13 @@ function updateTargetLabel() {
 
 function renderSuggestions() {
   const container = document.getElementById('suggestions');
+
+  const ownedCount = TABLETS.filter(t => (state.pool.get(t.id) || 0) > 0).length;
+  if (ownedCount === 0) {
+    container.innerHTML = '<div class="loading">左の石板一覧で、所持しているものにチェックを入れてから生成してください。<br>(「全所持」ボタンで一旦すべてチェックすることもできます)</div>';
+    return;
+  }
+
   container.innerHTML = '<div class="loading">プランを計算中…</div>';
   const maxTablets = parseInt(document.getElementById('maxTabletsInput').value || '6', 10);
 
